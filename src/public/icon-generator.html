@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinTabs Icon Generator</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 600px;
+      width: 100%;
+    }
+    
+    h1 {
+      color: #333;
+      margin-top: 0;
+      text-align: center;
+    }
+    
+    .preview {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin: 30px 0;
+    }
+    
+    canvas {
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    label {
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+      display: block;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: transform 0.2s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+    }
+    
+    .size-label {
+      text-align: center;
+      color: #666;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 FinTabs Icon Generator</h1>
+    
+    <div class="preview">
+      <div>
+        <canvas id="canvas192" width="192" height="192"></canvas>
+        <div class="size-label">192x192</div>
+      </div>
+      <div>
+        <canvas id="canvas512" width="512" height="512"></canvas>
+        <div class="size-label">512x512</div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <div>
+        <label>Иконка / Текст</label>
+        <input type="text" id="iconText" value="💰" maxlength="3">
+      </div>
+      
+      <div>
+        <label>Цвет 1 (градиент)</label>
+        <input type="color" id="color1" value="#3b82f6">
+      </div>
+      
+      <div>
+        <label>Цвет 2 (градиент)</label>
+        <input type="color" id="color2" value="#06b6d4">
+      </div>
+      
+      <div>
+        <label>Стиль</label>
+        <select id="style">
+          <option value="gradient">Градиент</option>
+          <option value="solid">Сплошной</option>
+          <option value="circle">Круглый</option>
+        </select>
+      </div>
+      
+      <button onclick="downloadIcons()">⬇️ Скачать иконки</button>
+    </div>
+  </div>
+  
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      const text = document.getElementById('iconText').value;
+      const color1 = document.getElementById('color1').value;
+      const color2 = document.getElementById('color2').value;
+      const style = document.getElementById('style').value;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, size, size);
+      
+      // Draw background
+      if (style === 'circle') {
+        const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (style === 'gradient') {
+        const gradient = ctx.createLinearGradient(0, 0, size, size);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+      } else {
+        ctx.fillStyle = color1;
+        ctx.fillRect(0, 0, size, size);
+      }
+      
+      // Draw text/emoji
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `bold ${size * 0.5}px Arial`;
+      ctx.fillText(text, size/2, size/2);
+    }
+    
+    function updatePreviews() {
+      drawIcon(document.getElementById('canvas192'), 192);
+      drawIcon(document.getElementById('canvas512'), 512);
+    }
+    
+    function downloadIcons() {
+      // Download 192x192
+      const canvas192 = document.getElementById('canvas192');
+      const link192 = document.createElement('a');
+      link192.download = 'icon-192.png';
+      link192.href = canvas192.toDataURL();
+      link192.click();
+      
+      // Download 512x512
+      setTimeout(() => {
+        const canvas512 = document.getElementById('canvas512');
+        const link512 = document.createElement('a');
+        link512.download = 'icon-512.png';
+        link512.href = canvas512.toDataURL();
+        link512.click();
+      }, 500);
+      
+      alert('✅ Иконки скачаны! Поместите их в папку /public/');
+    }
+    
+    // Update on input change
+    document.getElementById('iconText').addEventListener('input', updatePreviews);
+    document.getElementById('color1').addEventListener('input', updatePreviews);
+    document.getElementById('color2').addEventListener('input', updatePreviews);
+    document.getElementById('style').addEventListener('change', updatePreviews);
+    
+    // Initial draw
+    updatePreviews();
+  </script>
+</body>
+</html>
